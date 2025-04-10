@@ -8,6 +8,9 @@ from django.conf import settings
 from email.message import EmailMessage
 import ssl
 import smtplib
+from .models import JobProfile
+from .serializer import JobSerializer
+from datetime import date
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FormSendMail(APIView):
@@ -54,6 +57,14 @@ class FormSendMail(APIView):
             return Response({"success": True})
         except Exception as e:
             return Response({"success": False})
+        
+
+class UIJobProfile(APIView):
+    def get(self, request, *args, **kwargs):
+        JobProfile.objects.filter(validThroughDate__lt=date.today()).delete()
+        data = JobProfile.objects.all()
+        serializer = JobSerializer(data, many=True)
+        return Response(serializer.data)
 
 
 
